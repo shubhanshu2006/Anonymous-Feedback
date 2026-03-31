@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
       id: "credentials",
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "text" },
+        identifier: { label: "Email or Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any): Promise<any> {
@@ -23,7 +23,7 @@ export const authOptions: NextAuthOptions = {
             ],
           });
           if (!user) {
-            throw new Error("No user found with this email");
+            throw new Error("No user found with this email or username");
           }
           if (!user.isVerified) {
             throw new Error("Please verify your account before logging in");
@@ -33,12 +33,18 @@ export const authOptions: NextAuthOptions = {
             user.password,
           );
           if (isPasswordCorrect) {
-            return user;
+            return {
+              _id: user._id,
+              email: user.email,
+              username: user.username,
+              isVerified: user.isVerified,
+              isAcceptingMessages: user.isAcceptingMessages,
+            };
           } else {
             throw new Error("Incorrect password");
           }
         } catch (err: any) {
-          throw new Error(err);
+          throw err;
         }
       },
     }),
